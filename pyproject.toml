@@ -12,7 +12,7 @@ presentation = "web.toml"
 persistence = "redis.toml"
 message = "log.toml"
 
-[amessage.backend]
+[message.backend]
 adapter = "redis"
 host = "redis-18721.c339.eu-west-3-1.ec2.redns.redis-cloud.com"
 port = "18721"

@@ -2,11 +2,11 @@
     "__module__": {
         "generate_checksum": {
             "test": "0c95d2646532345ba5efdea7bcca6d6f37eb15bf70a1daae5afb0f846641778b",
-            "production": "c420149681e9483f7f048e7581f684fc9e9b0bb0544382e6ae008a6e665a054b"
+            "production": "f62ee260c2cc5a8298872645a6909a6be9c8e0b1b35eda2dc817d3190ec04df6"
         },
         "resource": {
             "test": "338142eb703e766a25b3c2dac96bc58fc147359c7c44626d673231ee90b815af",
-            "production": "ba593b5b0036720532be90b1ef54c3938a4ed081434d6dd893858a8d56d304e2"
+            "production": "4e77419b68b9026de6a700819a76611c6b3f495ad6c0a7429e07b846294fa904"
         }
     }
 }
