@@ -1,6 +1,4 @@
 {
-    imports:save:"application/action/save.dsl";delete:"application/action/delete.dsl";
-    exports:somma,delete.somma;
 
     managers : (
         {"path": "framework/manager/messenger.py"; "service": "messenger"; "config": {"cache_enabled": True; "log_level": "INFO";}; "dependency_keys": ("message"); "messenger": "messenger"; },
@@ -16,7 +14,7 @@
     );
     
     # Configurazione globale
-    configuration : "pyproject.toml" | resource | format | (dict, "toml"), convert;
+    configuration : "pyproject.toml" | resource | format | convert(dict, "toml");
     ports : ("presentation", "persistence", "message", "authentication", "actuator","authorization");
     
     # 2. Funzione per registrare un singolo driver
