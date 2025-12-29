@@ -1,5 +1,11 @@
 {
+    # Configurazione globale
+    configuration : "pyproject.toml" | resource | format | convert(dict, "toml");
+    ports : ("presentation", "persistence", "message", "authentication", "actuator","authorization");
+    mask : { "path": "infrastructure/message/console.py"; "service": "message"; "adapter": "adapter"; "payload": configuration; };
+    servicess : configuration | filter(ports)| print | foreach(print) | transform(mask) | print;
 
+    # Dati
     managers : (
         {"path": "framework/manager/messenger.py"; "service": "messenger"; "config": {"cache_enabled": True; "log_level": "INFO";}; "dependency_keys": ("message"); "messenger": "messenger"; },
         {"path": "framework/manager/executor.py"; "service": "executor"; "config": {"cache_enabled": True; "log_level": "INFO";}; "dependency_keys": ("actuator"); "messenger": "executor"; },
@@ -13,8 +19,5 @@
         {"path": "infrastructure/message/console.py"; "service": "message"; "adapter": "adapter"; "payload": config;}
     );
     
-    # Configurazione globale
-    configuration : "pyproject.toml" | resource | format | convert(dict, "toml") | print;
-    ports : ("presentation", "persistence", "message", "authentication", "actuator","authorization");
 
 }

@@ -221,6 +221,10 @@ dsl_functions.update({
     'values': lambda d: list(d.values()) if isinstance(d, dict) else [],
     'items': lambda d: list(d.items()) if isinstance(d, dict) else [],
     'print': lambda d: (print(f"*** CUSTOM PRINT ***: {d}"), d)[1],
+    'pick': lambda d, keys: {k: v for k, v in d.items() if k in keys} if isinstance(d, dict) and isinstance(keys, (list, tuple)) else d,
+    'filter': lambda d, keys: {k: v for k, v in d.items() if k in keys} if isinstance(d, dict) and isinstance(keys, (list, tuple)) else d,
+    'project': lambda d, mapping: {k: flow.get(d, v) for k, v in mapping.items()} if isinstance(d, dict) and isinstance(mapping, dict) else d,
+    'transform': lambda d, mapping: {k: flow.get(d, v) for k, v in mapping.items()} if isinstance(d, dict) and isinstance(mapping, dict) else d,
     'map': lambda d, f: [mistql.query(f, data=i) for i in d] if isinstance(d, list) else d,
     'merge': lambda a, b: (a | b) if isinstance(a, dict) and isinstance(b, dict) else b,
     'query': lambda data, q: mistql.query(q, data=data),
@@ -236,6 +240,7 @@ async def execute_dsl_file(content):
 
 async def run_dsl_tests(visitor, parsed_data):
     test_suite = parsed_data.get('test_suite', [])
+    if isinstance(test_suite, dict): test_suite = [test_suite]
     if not isinstance(test_suite, (list, tuple)): return False
     all_passed = True
     print("\n" + "="*40 + f"\nDSL Tests: {len(test_suite)}\n" + "="*40)

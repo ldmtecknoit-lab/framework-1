@@ -427,23 +427,22 @@ async def _load_python_module(name: str, path: str, code: str) -> types.ModuleTy
         raise ImportError(f"Esecuzione modulo Python fallita per {path}: {e}") from e
     return module
 
-async def resource(**kwargs) -> Any:
+async def resource(path) -> Any:
     """
     Carica una risorsa (JSON o modulo Python) e ne valida il contratto.
     """
-    resource_path = kwargs.get('path', '')
-    content = await _load_resource(path=resource_path)
+    content = await _load_resource(path=path)
     return await flow.switch({
         'match (regex ".json") @.path': flow.step(convert, content, dict, 'json'),
         'match (regex ".py") @.path': flow.step(flow.pipe,
             flow.step(_load_python_module, 'main_module', '@.path', content),
             flow.step(flow.switch, {
                 '@.path | match (regex ".test.py")': flow.step(lambda x: x, '@.outputs.-1'),
-                'true': flow.step(_validate_and_filter_module, '@.outputs.-1', resource_path),
+                'true': flow.step(_validate_and_filter_module, '@.outputs.-1', path),
             }),
         ),
         'true': flow.step(lambda: content),
-    }, context={'path': resource_path})
+    }, context={'path': path})
 
 # =====================================================================
 # --- Helper per load_di_entry (Refactoring Flow) ---

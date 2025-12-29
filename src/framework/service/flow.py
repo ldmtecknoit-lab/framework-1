@@ -1050,24 +1050,41 @@ async def catch(try_step, catch_step,context=dict()):
     
     return outcome
 
-async def foreach(input_list, step_to_run, context=dict()) -> List[Any]:
+async def foreach(input_data, step_to_run, context=dict()) -> List[Any]:
     """
-    Esegue uno step o un pipe su ogni elemento di una lista in modo sequenziale.
+    Esegue uno step o un pipe su ogni elemento di una lista, tupla o dizionario in modo sequenziale.
+    Se l'input è un dizionario, itera sui suoi VALORI.
     Ogni elemento della lista diventa l'initial_data per lo step_to_run.
     """
+    if isinstance(input_data, dict):
+        items = list(input_data.values())
+    elif isinstance(input_data, (list, tuple)):
+        items = list(input_data)
+    elif hasattr(input_data, '__iter__') and not isinstance(input_data, (str, bytes)):
+        items = list(input_data)
+    else:
+        raise TypeError(f"foreach si aspetta una lista, tupla o dizionario, ricevuto: {type(input_data)}")
+    
     results = []
+    for item in items:
+        # Prepariamo l'azione: se step_to_run è un callable o stringa, lo wrappiamo.
+        # Se è già un tuple (formato step), iniettiamo l'item come primo argomento posizionale.
+        if isinstance(step_to_run, tuple) and len(step_to_run) >= 1:
+            fun = step_to_run[0]
+            orig_args = step_to_run[1] if len(step_to_run) > 1 else ()
+            orig_kwargs = step_to_run[2] if len(step_to_run) > 2 else {}
+            action = (fun, (item,) + orig_args, orig_kwargs)
+        else:
+            action = (step_to_run, (item,), {})
 
-    # Se l'input_list è una tupla, la convertiamo in lista per l'iterazione, se necessario.
-    if isinstance(input_list, tuple):
-        input_list = list(input_list)
+        # Esegue lo step usando 'item' tramite _execute_step_internal con contesto isolato
+        outcome = await _execute_step_internal(action, context=context.copy())
         
-    if not isinstance(input_list, list):
-        raise TypeError(f"foreach si aspetta una lista o una tupla come primo argomento, ricevuto: {type(input_list)}")
-        
-    for item in input_list:
-        # Esegue lo step usando 'item' come initial_data del sub-flow
-        result = await pipe(item, step_to_run,context)
-        results.append(result)
+        # Estrae i dati dal risultato (standard Transaction format)
+        if isinstance(outcome, dict) and 'success' in outcome:
+            results.append(outcome.get('data'))
+        else:
+            results.append(outcome)
         
     return results
 
